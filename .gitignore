@@ -140,3 +140,7 @@ dmypy.json
 
 static/
 media/
+
+# .structure
+structure.md
+structure.py
