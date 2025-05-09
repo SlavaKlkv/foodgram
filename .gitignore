@@ -143,4 +143,6 @@ media/
 
 # .structure
 structure.md
-structure.py
+structure.sh
+
+TODO.md

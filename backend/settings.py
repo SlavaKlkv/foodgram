@@ -22,6 +22,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     'core',
     'users',
     'recipes',
@@ -105,3 +108,31 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+            'rest_framework.throttling.UserRateThrottle',
+            'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/hour',
+        'anon': '100/hour',
+    },
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.CustomLimitOffsetPagination',
+}
+
+DJOSER = {
+    'SERIALIZERS': {
+        **{
+            key: 'users.serializers.UserProfileSerializer'
+            for key in ('user', 'current_user')
+        },
+        'user_create': 'users.serializers.UserCreateSerializer',
+    }
+}

@@ -4,12 +4,14 @@ from .models import Subscription, User
 
 admin.site.empty_value_display = 'Не указано'
 
+
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'username',
         'first_name',
         'last_name',
-        'email'
+        'email',
+        'is_staff'
     )
     search_fields = ('username', 'email')
     ordering = ('username',)
