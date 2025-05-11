@@ -5,7 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import Subscription, User
-from users.serializers import (AvatarSerializer, PasswordSerializer, SubscriptionSerializer)
+from users.serializers import (AvatarSerializer, PasswordSerializer,
+                               SubscriptionSerializer)
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -45,13 +46,17 @@ class UserViewSet(DjoserUserViewSet):
     def subscriptions(self, request):
         user_subscriptions = Subscription.objects.filter(user=request.user)
         pages = self.paginate_queryset(user_subscriptions)
-        serializer = SubscriptionSerializer(pages, many=True, context={'request': request})
+        serializer = SubscriptionSerializer(
+            pages, many=True, context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=['put'], url_path='me/avatar')
     def set_avatar(self, request):
         user = request.user
-        serializer = AvatarSerializer(user, data=request.data, context={'request': request})
+        serializer = AvatarSerializer(
+            user, data=request.data, context={'request': request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -75,7 +80,10 @@ class UserViewSet(DjoserUserViewSet):
         new_password = serializer.validated_data['new_password']
 
         if not user.check_password(current_password):
-            return Response({'current_password': ['Неверный текущий пароль.']}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'current_password': ['Неверный текущий пароль.']},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         user.set_password(new_password)
         user.save()

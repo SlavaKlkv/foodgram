@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from core.constants import DIGITS
-from core.exceptions import ValidationError
+from core.fields import CustomBase64ImageField
 
 User = get_user_model()
 
@@ -11,7 +11,7 @@ User = get_user_model()
 class BaseUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email')
+        fields = ( 'email', 'id', 'username', 'first_name', 'last_name')
 
 
 class UserCreateSerializer(BaseUserSerializer):
@@ -32,7 +32,7 @@ class UserProfileSerializer(BaseUserSerializer):
     avatar = serializers.ImageField(use_url=True)
 
     class Meta(BaseUserSerializer.Meta):
-        fields = BaseUserSerializer.Meta.fields + ('is_subscribed', 'avatar')  # type: ignore
+        fields = BaseUserSerializer.Meta.fields + ('is_subscribed', 'avatar')
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
@@ -42,7 +42,7 @@ class UserProfileSerializer(BaseUserSerializer):
 
 
 class AvatarSerializer(serializers.ModelSerializer):
-    avatar = Base64ImageField(required=True)
+    avatar = CustomBase64ImageField(required=True)
 
     class Meta:
         model = User
