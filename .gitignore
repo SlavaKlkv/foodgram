@@ -146,3 +146,5 @@ structure.md
 structure.sh
 
 TODO.md
+
+.pylintrc

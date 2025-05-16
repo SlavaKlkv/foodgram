@@ -1,10 +1,11 @@
 from django.contrib import admin
 
-from .models import Subscription, User
+from users.models import Subscription, User
 
 admin.site.empty_value_display = 'Не указано'
 
 
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'username',
@@ -17,10 +18,7 @@ class UserAdmin(admin.ModelAdmin):
     ordering = ('username',)
 
 
+@admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('user', 'author')
     list_display_links = ('user', 'author')
-
-
-admin.site.register(User, UserAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
