@@ -34,7 +34,8 @@ class TestUsers:
         """Список пользователей доступен без авторизации."""
         response = APIClient().get(USERS_URL)
         assert response.status_code == HTTPStatus.OK, (
-            f'GET {USERS_URL} должен быть доступен без токена.'
+            f'GET {USERS_URL} должен быть доступен без токена, '
+            f'но вернул {response.status_code}'
         )
         assert isinstance(response.json().get('results'), list), \
             'Ожидается, что ответ содержит список пользователей.'
@@ -50,7 +51,8 @@ class TestUsers:
         }
         response = APIClient().post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.CREATED, (
-            f'POST {USERS_URL} с валидными данными должен возвращать 201.'
+            f'POST {USERS_URL} с валидными данными должен возвращать 201, '
+            f'но вернул {response.status_code}'
         )
         json_data = response.json()
         for field in ('id', 'email', 'username', 'first_name', 'last_name'):
@@ -74,7 +76,8 @@ class TestUsers:
         data.pop(missing_fields)
         response = APIClient().post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
-            f'POST {USERS_URL} без поля `{missing_fields}` должен возвращать 400.'
+            f'POST {USERS_URL} без поля `{missing_fields}` '
+            f'должен возвращать 400, но вернул {response.status_code}'
         )
 
     @pytest.mark.parametrize('field, invalid_value', [
@@ -98,7 +101,7 @@ class TestUsers:
         response = APIClient().post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
             f'POST {USERS_URL} с невалидным значением поля `{field}` '
-            f'должен возвращать 400.'
+            f'должен возвращать 400, но вернул {response.status_code}'
         )
 
     @pytest.mark.parametrize('field', ['email', 'username'])
@@ -114,7 +117,8 @@ class TestUsers:
         }
         response = APIClient().post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
-            f'POST {USERS_URL} с уже занятым `{field}` должен возвращать 400.'
+            f'POST {USERS_URL} с уже занятым `{field}` должен возвращать 400, '
+            f'но вернул {response.status_code}'
         )
 
     def test_user_profile_accessible_to_all(self, auth_client, user):
@@ -126,7 +130,8 @@ class TestUsers:
             (auth_client.get(url), 'авторизованного'),
         ):
             assert response.status_code == HTTPStatus.OK, (
-                f'GET {url} должен возвращать 200 для {label} пользователя.'
+                f'GET {url} должен возвращать 200 для {label} пользователя, '
+                f'но вернул {response.status_code}'
             )
             for field in (
                 'id', 'username', 'email', 'first_name', 'last_name',
@@ -143,7 +148,7 @@ class TestUsers:
         )
         assert response.status_code == HTTPStatus.NOT_FOUND, (
             'Запрос профиля пользователя с несуществующим id '
-            'должен возвращать 404.'
+            f'должен возвращать 404, но вернул {response.status_code}'
         )
 
     def test_get_current_user_profile(self, auth_client, user):
@@ -151,7 +156,8 @@ class TestUsers:
         response = auth_client.get(USER_ME_URL)
         assert response.status_code == HTTPStatus.OK, (
             f'GET {USER_ME_URL} должен возвращать 200 '
-            f'для авторизованного пользователя.'
+            f'для авторизованного пользователя, '
+            f'но вернул {response.status_code}'
         )
         json_data = response.json()
         for field in (
@@ -172,7 +178,7 @@ class TestUsers:
         assert response.json()['avatar'], 'Поле avatar не должно быть пустым.'
         assert response.status_code == HTTPStatus.OK, (
             f'PUT {USER_AVATAR_URL} с валидным изображением '
-            'должен возвращать 200.'
+            f'должен возвращать 200, но вернул {response.status_code}'
         )
 
     def test_delete_avatar_successfully(self, auth_client, tmp_path):
@@ -185,7 +191,10 @@ class TestUsers:
             f'DELETE {USER_AVATAR_URL} должен возвращать 204.'
         )
         response = auth_client.get(USER_ME_URL)
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.OK, (
+            f'GET {USER_ME_URL} должен возвращать 200 после удаления аватара, '
+            f'но вернул {response.status_code}'
+        )
         assert response.json()['avatar'] is None, (
             'После удаления аватара это поле должно быть пустым.'
         )
@@ -203,7 +212,8 @@ class TestUsers:
             USER_AVATAR_URL, data=payload, format='json'
         )
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
-            f'PUT {USER_AVATAR_URL} с данными {payload} должен возвращать 400.'
+            f'PUT {USER_AVATAR_URL} с данными {payload} должен возвращать 400,'
+            f' но вернул {response.status_code}'
         )
 
     def test_change_password_successfully(self, auth_client):
@@ -214,7 +224,8 @@ class TestUsers:
         }
         response = auth_client.post(USER_PASSWORD_URL, data=payload)
         assert response.status_code == HTTPStatus.NO_CONTENT, (
-            'Успешная смена пароля должна возвращать 204.'
+            'Успешная смена пароля должна возвращать 204, '
+            f'но вернула {response.status_code}'
         )
 
     @pytest.mark.parametrize('payload', [
@@ -231,7 +242,7 @@ class TestUsers:
         response = auth_client.post(USER_PASSWORD_URL, data=payload)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
             f'POST {USER_PASSWORD_URL} с данными {payload} '
-            'должен возвращать 400.'
+            f'должен возвращать 400, но вернул {response.status_code}'
         )
 
     def test_token_login_successfully(self, user):
@@ -241,8 +252,9 @@ class TestUsers:
             'password': user.plaintext_password
         })
         assert response.status_code == HTTPStatus.OK, (
-            f'POST {USER_LOGIN_URL} '
-            'должен возвращать 200 при корректных данных.'
+            f'POST {USER_LOGIN_URL} ' 
+            f'должен возвращать 200 при корректных данных, '
+            f'но вернул {response.status_code}'
         )
         assert 'auth_token' in response.json(), (
             'Ответ должен содержать поле auth_token.'
@@ -253,5 +265,6 @@ class TestUsers:
         response = auth_client.post(USER_LOGOUT_URL)
         assert response.status_code == HTTPStatus.NO_CONTENT, (
             f'POST {USER_LOGOUT_URL} '
-            'должен возвращать 204 при успешном выходе.'
+            f'должен возвращать 204 при успешном выходе, '
+            f'но вернул {response.status_code}'
         )

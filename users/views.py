@@ -1,3 +1,4 @@
+from django.http import Http404
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -23,11 +24,21 @@ class UserViewSet(DjoserUserViewSet):
 
     def _handle_subscription(self, request, action):
         user = request.user
-        author = self.get_object()
+        try:
+            author = self.get_object()
+        except Http404:
+            return Response(
+                {'detail': 'Такого пользователя не существует.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if action == 'create':
-            subscription = Subscription.objects.create(user=user, author=author)
-            serializer = SubscriptionSerializer(subscription, context={'request': request})
+            serializer = SubscriptionSerializer(
+                data={'author': author.id,},
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if action == 'delete':

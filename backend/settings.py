@@ -125,6 +125,8 @@ REST_FRAMEWORK = {
         'anon': '100/hour',
     },
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.CustomLimitOffsetPagination',
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler'
+
 }
 
 DJOSER = {

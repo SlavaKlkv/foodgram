@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from core.constants import DIGITS
+from core.exceptions import ValidationError
 from core.fields import CustomBase64ImageField
+from recipes.serializers import RecipeShortSerializer
+from users.models import Subscription
 
 User = get_user_model()
 
@@ -38,7 +40,7 @@ class UserProfileSerializer(BaseUserSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return user.follower.filter(author=obj).exists()
+        return user.followers.filter(author=obj).exists()
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -57,20 +59,42 @@ class PasswordSerializer(serializers.Serializer):
 class SubscriptionSerializer(UserProfileSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+    avatar = serializers.ImageField(read_only=True, use_url=True)
+    author = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        write_only=True
+    )
 
     class Meta(UserProfileSerializer.Meta):
-        fields = UserProfileSerializer.Meta.fields + ('recipes', 'recipes_count')
+        fields = BaseUserSerializer.Meta.fields + (
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar',
+            'author'
+        )
+        extra_kwargs = {
+            'email': {'read_only': True},
+            'username': {'read_only': True},
+            'first_name': {'read_only': True},
+            'last_name': {'read_only': True},
+        }
 
     def to_representation(self, instance):
         return super().to_representation(instance.author)
 
     def get_recipes(self, obj):
-        from recipes.serializers import RecipeShortSerializer  # Чтобы избежать циклического импорта
-        recipes_limit = self.context.get('request').query_params.get('recipes_limit')
+        recipes_limit = self.context.get('request').query_params.get(
+            'recipes_limit'
+        )
         recipes = obj.recipes.all()
         if recipes_limit is not None and recipes_limit in DIGITS:
             recipes = recipes[:int(recipes_limit)]
-        return RecipeShortSerializer(recipes, many=True, context=self.context).data
+        return RecipeShortSerializer(
+            recipes,
+            many=True,
+            context=self.context
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -83,9 +107,17 @@ class SubscriptionSerializer(UserProfileSerializer):
     def validate_author(self, author):
         user = self.context['request'].user
         request = self.context['request']
-        is_subscribed = user.follower.filter(author=author).exists()
+        is_subscribed = Subscription.objects.filter(
+            user_id=user.id,
+            author_id=author.id
+        ).exists()
         if request.method == 'POST' and is_subscribed:
             raise ValidationError('Вы уже подписаны на этого пользователя.')
         if request.method == 'DELETE' and not is_subscribed:
             raise ValidationError('Подписка не найдена.')
         return author
+
+    def create(self, validated_data):
+        author = validated_data['author']
+        user = self.context['request'].user
+        return Subscription.objects.create(user=user, author=author)

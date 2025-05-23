@@ -8,6 +8,8 @@ from core.constants import (
     USER_LOGOUT_URL,
     USER_ME_URL,
     USER_PASSWORD_URL,
+    USER_SUBSCRIBE_URL,
+    USER_SUBSCRIPTIONS_URL
 )
 
 
@@ -19,7 +21,9 @@ from core.constants import (
             USER_ME_URL: ('get',),
             USER_AVATAR_URL: ('put', 'delete'),
             USER_PASSWORD_URL: ('post',),
-            USER_LOGOUT_URL: ('post',)
+            USER_LOGOUT_URL: ('post',),
+            USER_SUBSCRIPTIONS_URL: ('get',),
+            USER_SUBSCRIBE_URL: ('post', 'delete')
         }.items()
         for method in methods
     ]
