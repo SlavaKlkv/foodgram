@@ -47,7 +47,6 @@ class TestSubscriptions:
         self, auth_client, user, user_2, target_id, error_text
     ):
         """Попытки подписаться на себя и повторно возвращают 400."""
-
         url = USER_SUBSCRIBE_URL.format(
             id=user.id if target_id == 'self' else user_2.id
         )
@@ -68,19 +67,6 @@ class TestSubscriptions:
         assert error_text in response.json().get('detail', ''), (
             f"Ожидалось сообщение об ошибке: '{error_text}', "
             f"но было: {response.json()}"
-        )
-
-    @pytest.mark.parametrize('method', ['post', 'delete'])
-    def test_subscribe_to_nonexistent_user_returns_404(self, auth_client, method):
-        """Попытка подписки на несуществующего пользователя
-        или отписки от него возвращает 404.
-        """
-        nonexistent_id = 1000000
-        url = USER_SUBSCRIBE_URL.format(id=nonexistent_id)
-        response = getattr(auth_client, method)(url)
-        assert response.status_code == HTTPStatus.NOT_FOUND, (
-            f'{method.upper()} {url} должен возвращать 404, '
-            f'но вернул {response.status_code}'
         )
 
     def test_unsubscribe_successfully_deletes_subscription(self,

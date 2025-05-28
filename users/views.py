@@ -5,12 +5,17 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from core.mixins import CustomGetObjectMixin
 from users.models import Subscription, User
-from users.serializers import (AvatarSerializer, PasswordSerializer,
-                               SubscriptionSerializer)
+from users.serializers import (
+    AvatarSerializer,
+    PasswordSerializer,
+    SubscriptionSerializer
+)
 
 
-class UserViewSet(DjoserUserViewSet):
+class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
+    not_found_detail = 'Такого пользователя не существует.'
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):

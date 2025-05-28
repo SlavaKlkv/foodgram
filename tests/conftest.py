@@ -24,6 +24,10 @@ pytest_plugins = [
     'tests.fixtures.fixture_data',
 ]
 
+@pytest.fixture
+def client_name(request):
+    return request.getfixturevalue(request.param)
+
 @pytest.fixture(autouse=True)
 def temp_media_root():
     temp_dir = tempfile.mkdtemp()

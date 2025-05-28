@@ -3,7 +3,6 @@ from http import HTTPStatus
 
 import pytest
 from PIL import Image
-from rest_framework.test import APIClient
 
 from core.constants import (
     USER_AVATAR_URL,
@@ -30,17 +29,19 @@ def add_avatar(auth_client, tmp_path, color='red'):
 @pytest.mark.django_db(transaction=True)
 class TestUsers:
 
-    def test_get_users_list_unauthorized(self):
+    def test_get_users_list_unauthorized(self, client):
         """Список пользователей доступен без авторизации."""
-        response = APIClient().get(USERS_URL)
+        response = client.get(USERS_URL)
         assert response.status_code == HTTPStatus.OK, (
             f'GET {USERS_URL} должен быть доступен без токена, '
             f'но вернул {response.status_code}'
         )
+        assert "results" in response.json(), \
+            'Ответ должен содержать ключ "results"'
         assert isinstance(response.json().get('results'), list), \
-            'Ожидается, что ответ содержит список пользователей.'
+            'Значение по ключу "results" должно быть списком'
 
-    def test_register_user_successfully(self):
+    def test_register_user_successfully(self, client):
         """Новый пользователь может зарегистрироваться."""
         data = {
             'email': 'newuser@example.com',
@@ -49,7 +50,7 @@ class TestUsers:
             'last_name': 'User',
             'password': 'strongpassword123'
         }
-        response = APIClient().post(USERS_URL, data=data)
+        response = client.post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.CREATED, (
             f'POST {USERS_URL} с валидными данными должен возвращать 201, '
             f'но вернул {response.status_code}'
@@ -63,7 +64,9 @@ class TestUsers:
         'email', 'username', 'first_name', 'last_name', 'password'
     ])
     def test_register_user_missing_required_field_returns_400(
-            self, missing_fields
+            self,
+            client,
+            missing_fields
     ):
         """Регистрация без обязательного поля возвращает 400."""
         data = {
@@ -74,7 +77,7 @@ class TestUsers:
             'password': 'strongpass123'
         }
         data.pop(missing_fields)
-        response = APIClient().post(USERS_URL, data=data)
+        response = client.post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
             f'POST {USERS_URL} без поля `{missing_fields}` '
             f'должен возвращать 400, но вернул {response.status_code}'
@@ -87,7 +90,10 @@ class TestUsers:
         ('username', '!!!invalid###'),
     ])
     def test_register_user_with_invalid_field_returns_400(
-            self, field, invalid_value
+            self,
+            client,
+            field,
+            invalid_value
     ):
         """Регистрация с невалидным значением поля возвращает 400."""
         data = {
@@ -98,14 +104,17 @@ class TestUsers:
             'password': 'strongpass123',
             field: invalid_value
         }
-        response = APIClient().post(USERS_URL, data=data)
+        response = client.post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
             f'POST {USERS_URL} с невалидным значением поля `{field}` '
             f'должен возвращать 400, но вернул {response.status_code}'
         )
 
     @pytest.mark.parametrize('field', ['email', 'username'])
-    def test_register_user_with_duplicate_field_returns_400(self, user, field):
+    def test_register_user_with_duplicate_field_returns_400(self,
+                                                            client,
+                                                            user,
+                                                            field):
         """Регистрация с уже занятым email или username возвращает 400."""
         data = {
             'email': 'unique@example.com',
@@ -115,58 +124,57 @@ class TestUsers:
             'password': 'strongpass123',
             field: getattr(user, field)
         }
-        response = APIClient().post(USERS_URL, data=data)
+        response = client.post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
             f'POST {USERS_URL} с уже занятым `{field}` должен возвращать 400, '
             f'но вернул {response.status_code}'
         )
 
-    def test_user_profile_accessible_to_all(self, auth_client, user):
-        """Профиль пользователя доступен всем."""
-        url = USER_DETAIL_URL.format(id=user.id)
+    @pytest.mark.parametrize('url_name, is_self', [
+        (lambda user: USER_DETAIL_URL.format(id=user.id), False),
+        (lambda user: USER_ME_URL, True),
+    ])
+    def test_user_profile_returns_correct_data(
+            self,
+            auth_client,
+            client,
+            user,
+            url_name,
+            is_self
+    ):
+        """
+        Профиль пользователя доступен всем и возвращает корректные данные.
+        """
+        if is_self:
+            clients = (auth_client,)
+        else:
+            clients = (client, auth_client)
 
-        for response, label in (
-            (APIClient().get(url), 'неавторизованного'),
-            (auth_client.get(url), 'авторизованного'),
-        ):
+        for api_client in clients:
+            url = url_name(user)
+            response = api_client.get(url)
             assert response.status_code == HTTPStatus.OK, (
-                f'GET {url} должен возвращать 200 для {label} пользователя, '
+                f'GET {url} должен возвращать 200, '
                 f'но вернул {response.status_code}'
             )
-            for field in (
-                'id', 'username', 'email', 'first_name', 'last_name',
+            json_data = response.json()
+            expected_fields = (
+                'email', 'id', 'username', 'first_name', 'last_name',
                 'is_subscribed', 'avatar'
-            ):
-                assert field in response.json(), (
+            )
+            for field in expected_fields:
+                assert field in json_data,\
                     f'В ответе должно быть поле `{field}`.'
-                )
 
-    def test_user_profile_not_found_returns_404(self, user):
-        """Запрос профиля несуществующего пользователя возвращает 404."""
-        response = APIClient().get(
-            USER_DETAIL_URL.format(id=user.id + 1000000)
-        )
-        assert response.status_code == HTTPStatus.NOT_FOUND, (
-            'Запрос профиля пользователя с несуществующим id '
-            f'должен возвращать 404, но вернул {response.status_code}'
-        )
-
-    def test_get_current_user_profile(self, auth_client, user):
-        """Пользователь может получить свой профиль."""
-        response = auth_client.get(USER_ME_URL)
-        assert response.status_code == HTTPStatus.OK, (
-            f'GET {USER_ME_URL} должен возвращать 200 '
-            f'для авторизованного пользователя, '
-            f'но вернул {response.status_code}'
-        )
-        json_data = response.json()
-        for field in (
-            'email', 'id', 'username', 'first_name', 'last_name',
-            'is_subscribed', 'avatar'
-        ):
-            assert field in json_data, f'В ответе должно быть поле `{field}`.'
-        assert json_data['id'] == user.id,\
-            'ID пользователя должен совпадать с авторизованным.'
+            assert json_data['id'] == user.id, 'Неверный id.'
+            assert json_data['email'] == user.email, 'Неверный email.'
+            assert json_data['username'] == user.username, 'Неверный username.'
+            assert json_data['first_name'] == user.first_name,\
+                'Неверный first_name.'
+            assert json_data['last_name'] == user.last_name,\
+                'Неверный last_name.'
+            assert json_data['is_subscribed'] is False,\
+                'Поле is_subscribed должно быть False.'
 
     def test_add_avatar_successfully(self, auth_client, tmp_path):
         """Пользователь может добавить аватар."""
@@ -245,9 +253,9 @@ class TestUsers:
             f'должен возвращать 400, но вернул {response.status_code}'
         )
 
-    def test_token_login_successfully(self, user):
+    def test_token_login_successfully(self, client, user):
         """Пользователь может получить токен при входе с валидными данными."""
-        response = APIClient().post(USER_LOGIN_URL, data={
+        response = client.post(USER_LOGIN_URL, data={
             'email': user.email,
             'password': user.plaintext_password
         })

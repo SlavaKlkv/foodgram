@@ -11,6 +11,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
+SITE_URL = 'https://foodgram.example.org'
+
 ALLOWED_HOSTS = ['127.0.0.1']
 
 
@@ -24,6 +26,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'djoser',
     'core',
     'users',
@@ -125,7 +128,10 @@ REST_FRAMEWORK = {
         'anon': '100/hour',
     },
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.CustomLimitOffsetPagination',
-    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 
 }
 

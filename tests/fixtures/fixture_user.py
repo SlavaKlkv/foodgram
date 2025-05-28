@@ -12,6 +12,11 @@ def user(django_user_model):
 
 
 @pytest.fixture
+def client():
+    return APIClient()
+
+
+@pytest.fixture
 def user_2(django_user_model):
     return django_user_model.objects.create_user(
         username='testuser2', email='testuser2@email.com', password='1234567'

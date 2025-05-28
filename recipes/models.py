@@ -16,20 +16,22 @@ class Tag(models.Model):
         max_length=TAG_FIELD_MAX_LENGTH,
         unique=True,
         verbose_name='Название тега',
+        blank=True,
+        default='tag'
+    )
+    slug = models.SlugField(
+        max_length=TAG_FIELD_MAX_LENGTH,
+        unique=True,
+        verbose_name='Слаг',
+        blank=True,
+        null=True,
         validators=[
             RegexValidator(
                 regex=r'^[-a-zA-Z0-9_]+$',
                 message='Слаг может содержать только латинские буквы, цифры, '
                         'дефис и подчёркивание.'
             )
-        ],
-        blank=True,
-        null=True
-    )
-    slug = models.SlugField(
-        max_length=TAG_FIELD_MAX_LENGTH,
-        unique=True,
-        verbose_name='Слаг',
+        ]
     )
 
     class Meta:
@@ -38,7 +40,6 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
-
 
 
 class Ingredient(models.Model):
@@ -133,34 +134,6 @@ class RecipeIngredient(models.Model):
         return f'{self.ingredient.name} — {self.amount}'
 
 
-class Favorite(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name='Пользователь'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='favorited_by',
-        verbose_name='Рецепт в избранном'
-    )
-
-    class Meta:
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранное'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.user} добавил в избранное: {self.recipe}'
-
-
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
@@ -187,3 +160,31 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return f'{self.user} добавил в покупки: {self.recipe}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+        verbose_name='Рецепт в избранном'
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} добавил в избранное: {self.recipe}'
