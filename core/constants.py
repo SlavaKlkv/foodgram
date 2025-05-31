@@ -8,6 +8,8 @@ NON_EXISTENT_ID = 1000000
 
 DIGITS = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 
+UNAUTH_AND_AUTH_CLIENTS = ('client', 'auth_client')
+
 # Users
 USERS_URL = '/api/users/'
 USER_DETAIL_URL = '/api/users/{id}/'

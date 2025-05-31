@@ -1,7 +1,31 @@
 import django_filters
+from django.db.models import (
+    Case,
+    IntegerField,
+    Q,
+    When
+)
 
-from recipes.models import Recipe
+from recipes.models import Ingredient, Recipe
 
+
+class IngredientFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(method='filter_name')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
+
+    def filter_name(self, queryset, name, value):
+        return queryset.filter(
+            Q(name__istartswith=value) | Q(name__icontains=value)
+        ).annotate(
+            priority=Case(
+                When(name__istartswith=value, then=0),
+                default=1,
+                output_field=IntegerField()
+            )
+        ).order_by('priority', 'name')
 
 class RecipeFilter(django_filters.FilterSet):
     is_favorited = django_filters.BooleanFilter(method='filter_is_favorited')
@@ -11,7 +35,7 @@ class RecipeFilter(django_filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['author', 'tags']
+        fields = ('author', 'tags')
 
     def _filter_by_user_relation(self, queryset, related_field, value):
         user = self.request.user

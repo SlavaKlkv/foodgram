@@ -1,8 +1,13 @@
 from django.http import Http404
 from rest_framework.exceptions import NotFound
 
+
 class CustomGetObjectMixin:
-    not_found_detail = 'Объект не найден.'
+    object = 'объекта'
+
+    @property
+    def not_found_detail(self):
+        return f'Такого {self.object} не существует.'
 
     def get_object(self):
         try:

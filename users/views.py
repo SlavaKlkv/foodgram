@@ -15,7 +15,7 @@ from users.serializers import (
 
 
 class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
-    not_found_detail = 'Такого пользователя не существует.'
+    object = 'пользователя'
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
