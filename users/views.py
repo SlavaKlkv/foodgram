@@ -50,7 +50,7 @@ class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
             Subscription.objects.filter(user=user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=('post',))
     def subscribe(self, request, id=None):
         return self._handle_subscription(request, 'create')
 
@@ -58,7 +58,7 @@ class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
     def unsubscribe(self, request, id=None):
         return self._handle_subscription(request, 'delete')
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=('get',))
     def subscriptions(self, request):
         user_subscriptions = Subscription.objects.filter(user=request.user)
         pages = self.paginate_queryset(user_subscriptions)
@@ -67,7 +67,7 @@ class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['put'], url_path='me/avatar')
+    @action(detail=False, methods=('put',), url_path='me/avatar')
     def set_avatar(self, request):
         user = request.user
         serializer = AvatarSerializer(
@@ -86,7 +86,7 @@ class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
             user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['post'], url_path='set_password')
+    @action(detail=False, methods=('post',), url_path='set_password')
     def set_password(self, request):
         user = request.user
         serializer = PasswordSerializer(data=request.data)

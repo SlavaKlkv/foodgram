@@ -4,7 +4,6 @@ from rest_framework import serializers
 from core.constants import DIGITS
 from core.exceptions import ValidationError
 from core.fields import CustomBase64ImageField
-from recipes.serializers import RecipeShortSerializer
 from users.models import Subscription
 
 User = get_user_model()
@@ -84,6 +83,8 @@ class SubscriptionSerializer(UserProfileSerializer):
         return super().to_representation(instance.author)
 
     def get_recipes(self, obj):
+        # Чтобы избежать циклического импорта
+        from recipes.serializers import RecipeShortSerializer
         recipes_limit = self.context.get('request').query_params.get(
             'recipes_limit'
         )

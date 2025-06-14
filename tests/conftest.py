@@ -25,7 +25,7 @@ pytest_plugins = [
 ]
 
 @pytest.fixture
-def client_name(request):
+def fixture_name(request):
     return request.getfixturevalue(request.param)
 
 @pytest.fixture(autouse=True)

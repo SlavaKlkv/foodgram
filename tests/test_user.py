@@ -1,17 +1,44 @@
 import base64
 from http import HTTPStatus
+from typing import (
+    Any,
+    Dict,
+    List,
+    Tuple
+)
 
 import pytest
 from PIL import Image
 
 from core.constants import (
+    UNAUTH_AND_AUTH_CLIENTS,
     USER_AVATAR_URL,
     USER_DETAIL_URL,
-    USER_LOGIN_URL, USER_LOGOUT_URL, USER_ME_URL,
+    USER_LOGIN_URL,
+    USER_LOGOUT_URL,
+    USER_ME_URL,
     USER_PASSWORD_URL,
     USERS_URL,
 )
+from users.models import User
+from .test_utils import list_available
 
+INVALID_VALUES: Dict[str, List[Any]] = {
+    'email': [
+        'not an email'
+    ],
+    'username': [
+        '',
+        '   ',
+        '!!!invalid###'
+    ]
+}
+
+PARAMS: List[Tuple[str, Any]] = [
+    (field, invalid_value)
+    for field, invalid_list in INVALID_VALUES.items()
+    for invalid_value in invalid_list
+]
 
 def add_avatar(auth_client, tmp_path, color='red'):
     image_path = tmp_path / 'avatar.png'
@@ -31,18 +58,13 @@ class TestUsers:
 
     def test_get_users_list_unauthorized(self, client):
         """Список пользователей доступен без авторизации."""
-        response = client.get(USERS_URL)
-        assert response.status_code == HTTPStatus.OK, (
-            f'GET {USERS_URL} должен быть доступен без токена, '
-            f'но вернул {response.status_code}'
-        )
-        assert "results" in response.json(), \
-            'Ответ должен содержать ключ "results"'
-        assert isinstance(response.json().get('results'), list), \
-            'Значение по ключу "results" должно быть списком'
+        list_available(USERS_URL, client)
 
     def test_register_user_successfully(self, client):
-        """Новый пользователь может зарегистрироваться."""
+        """
+        Новый пользователь может зарегистрироваться
+        и возвращаются корректные данные.
+        """
         data = {
             'email': 'newuser@example.com',
             'username': 'newuser',
@@ -50,23 +72,40 @@ class TestUsers:
             'last_name': 'User',
             'password': 'strongpassword123'
         }
+        initial_count = User.objects.count()
+
         response = client.post(USERS_URL, data=data)
+
         assert response.status_code == HTTPStatus.CREATED, (
             f'POST {USERS_URL} с валидными данными должен возвращать 201, '
             f'но вернул {response.status_code}'
         )
+        assert User.objects.count() == initial_count + 1, (
+            'Количество пользователей должно увеличиваться '
+            'после регистрации нового.'
+        )
+
         json_data = response.json()
+
         for field in ('id', 'email', 'username', 'first_name', 'last_name'):
             assert field in json_data, \
                 f'В ответе должно присутствовать поле `{field}`.'
 
-    @pytest.mark.parametrize('missing_fields', [
+        for key, value in data.items():
+            if key == 'password':
+                continue
+            assert json_data.get(key) == value, (
+                f'Значение поля `{key}` должно быть `{value}`, '
+                f'но вернулось `{json_data.get(key)}`.'
+            )
+
+    @pytest.mark.parametrize('missing_field', [
         'email', 'username', 'first_name', 'last_name', 'password'
     ])
     def test_register_user_missing_required_field_returns_400(
             self,
             client,
-            missing_fields
+            missing_field
     ):
         """Регистрация без обязательного поля возвращает 400."""
         data = {
@@ -76,26 +115,24 @@ class TestUsers:
             'last_name': 'User',
             'password': 'strongpass123'
         }
-        data.pop(missing_fields)
+        data.pop(missing_field)
         response = client.post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
-            f'POST {USERS_URL} без поля `{missing_fields}` '
+            f'POST {USERS_URL} без поля `{missing_field}` '
             f'должен возвращать 400, но вернул {response.status_code}'
         )
+        assert missing_field in response.json(), (
+            f"В ответе должен присутствовать ключ `{missing_field}` с ошибкой."
+        )
 
-    @pytest.mark.parametrize('field, invalid_value', [
-        ('email', 'not-an-email'),
-        ('username', ''),
-        ('username', '   '),
-        ('username', '!!!invalid###'),
-    ])
+    @pytest.mark.parametrize('field, invalid_value', PARAMS)
     def test_register_user_with_invalid_field_returns_400(
             self,
             client,
             field,
             invalid_value
     ):
-        """Регистрация с невалидным значением поля возвращает 400."""
+        """Регистрация с неправильным значением поля возвращает 400."""
         data = {
             'email': 'user@example.com',
             'username': 'validuser',
@@ -106,8 +143,11 @@ class TestUsers:
         }
         response = client.post(USERS_URL, data=data)
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
-            f'POST {USERS_URL} с невалидным значением поля `{field}` '
+            f'POST {USERS_URL} с неправильным значением поля `{field}` '
             f'должен возвращать 400, но вернул {response.status_code}'
+        )
+        assert field in response.json(), (
+            f"В ответе должен присутствовать ключ `{field}` с ошибкой."
         )
 
     @pytest.mark.parametrize('field', ['email', 'username'])
@@ -130,51 +170,59 @@ class TestUsers:
             f'но вернул {response.status_code}'
         )
 
-    @pytest.mark.parametrize('url_name, is_self', [
-        (lambda user: USER_DETAIL_URL.format(id=user.id), False),
-        (lambda user: USER_ME_URL, True),
-    ])
-    def test_user_profile_returns_correct_data(
+    @pytest.mark.parametrize(
+        'url, fixture_name',
+        [
+            (url, fixture_name)
+            for url, clients in {
+            USER_DETAIL_URL: UNAUTH_AND_AUTH_CLIENTS,
+            USER_ME_URL: ('auth_client',)
+        }.items()
+            for fixture_name in clients
+        ],
+    indirect=('fixture_name',)
+    )
+    def test_user_profile_available_and_returns_correct_data(
             self,
-            auth_client,
-            client,
+            url,
+            fixture_name,
             user,
-            url_name,
-            is_self
     ):
         """
-        Профиль пользователя доступен всем и возвращает корректные данные.
+        Любой пользователь может получить профиль другого по id
+        с корректными данными и авторизованному доступен свой.
         """
-        if is_self:
-            clients = (auth_client,)
-        else:
-            clients = (client, auth_client)
+        resolved_url = url.format(id=user.id) if '{id}' in url else url
+        response = getattr(fixture_name, 'get')(resolved_url)
 
-        for api_client in clients:
-            url = url_name(user)
-            response = api_client.get(url)
-            assert response.status_code == HTTPStatus.OK, (
-                f'GET {url} должен возвращать 200, '
-                f'но вернул {response.status_code}'
-            )
-            json_data = response.json()
-            expected_fields = (
-                'email', 'id', 'username', 'first_name', 'last_name',
-                'is_subscribed', 'avatar'
-            )
-            for field in expected_fields:
-                assert field in json_data,\
-                    f'В ответе должно быть поле `{field}`.'
+        assert response.status_code == HTTPStatus.OK, (
+            f'GET {url} должен возвращать 200, '
+            f'но вернул {response.status_code}'
+        )
 
-            assert json_data['id'] == user.id, 'Неверный id.'
-            assert json_data['email'] == user.email, 'Неверный email.'
-            assert json_data['username'] == user.username, 'Неверный username.'
-            assert json_data['first_name'] == user.first_name,\
-                'Неверный first_name.'
-            assert json_data['last_name'] == user.last_name,\
-                'Неверный last_name.'
-            assert json_data['is_subscribed'] is False,\
-                'Поле is_subscribed должно быть False.'
+        json_data = response.json()
+        expected_fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'avatar'
+        )
+        for field in expected_fields:
+            assert field in json_data, f'В ответе должно быть поле `{field}`.'
+
+        assert json_data.get('id') == user.id, 'Неверный id.'
+        assert json_data.get('email') == user.email, 'Неверный email.'
+        assert json_data.get('username') == user.username, 'Неверный username.'
+        assert json_data.get('first_name') == user.first_name, \
+            'Неверный first_name.'
+        assert json_data.get('last_name') == user.last_name, \
+            'Неверный last_name.'
+        assert json_data.get('is_subscribed') is False, \
+            'Поле is_subscribed должно быть False.'
+
 
     def test_add_avatar_successfully(self, auth_client, tmp_path):
         """Пользователь может добавить аватар."""

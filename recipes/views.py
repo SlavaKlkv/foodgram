@@ -34,20 +34,25 @@ class IngredientViewSet(CustomGetObjectMixin, viewsets.ReadOnlyModelViewSet):
     object = 'ингредиента'
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(CustomGetObjectMixin, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    object = 'рецепта'
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
+    def get_permissions(self):
+        if self.request.method in ('PATCH', 'DELETE'):
+            return (IsAuthorOrReadOnly(),)
+        return super().get_permissions()
 
-    @action(detail=True, methods=('get',))
-    def get_link(self):
+
+    @action(detail=True, methods=('get',), url_path='get-link')
+    def get_link(self, request, *args, **kwargs):
         recipe = self.get_object()
         return Response(
             {'short-link': f'{settings.SITE_URL}/s/{recipe.id}'}

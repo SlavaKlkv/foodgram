@@ -148,3 +148,5 @@ structure.sh
 TODO.md
 
 .pylintrc
+
+logs/

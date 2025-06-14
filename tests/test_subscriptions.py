@@ -4,6 +4,7 @@ import pytest
 
 from core.constants import USER_SUBSCRIBE_URL, USER_SUBSCRIPTIONS_URL
 from users.models import Subscription
+from .test_utils import list_available
 
 
 @pytest.mark.django_db(transaction=True)
@@ -11,11 +12,7 @@ class TestSubscriptions:
 
     def test_get_subscriptions_returns_200(self, auth_client):
         """Получение списка подписок возвращает 200."""
-        response = auth_client.get(USER_SUBSCRIPTIONS_URL)
-        assert response.status_code == HTTPStatus.OK, (
-            f'GET {USER_SUBSCRIPTIONS_URL} должен возвращать 200, '
-            f'но вернул {response.status_code}'
-        )
+        list_available(USER_SUBSCRIPTIONS_URL, auth_client)
 
 
     def test_subscribe_successfully_creates_subscription(
@@ -26,13 +23,12 @@ class TestSubscriptions:
         url = USER_SUBSCRIBE_URL.format(id=user_2.id)
         subscriptions_before = Subscription.objects.count()
         response = auth_client.post(url)
-        subscriptions_after = Subscription.objects.count()
 
         assert response.status_code == HTTPStatus.CREATED, (
             f'POST {url} должен возвращать 201, '
             f'но вернул {response.status_code}'
         )
-        assert subscriptions_after == subscriptions_before + 1, (
+        assert Subscription.objects.count() == subscriptions_before + 1, (
             'Количество подписок должно увеличиться на 1.'
         )
 

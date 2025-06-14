@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-SITE_URL = 'https://foodgram.example.org'
+SITE_URL = 'http://127.0.0.1:8000'
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -45,6 +45,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'core.middleware.Custom404Middleware',
 ]
 
 ROOT_URLCONF = "backend.urls"

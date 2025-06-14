@@ -1,7 +1,12 @@
 from django.db import IntegrityError
 from rest_framework import status
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
+
+from logging_setup import logger_setup
+
+logger = logger_setup()
 
 
 class ValidationError(Exception):
@@ -18,8 +23,8 @@ class ValidationError(Exception):
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
-    print('>>> exc:', type(exc), exc)
-    print('>>> response:', response)
+    logger.error('Exception: %s %s', type(exc), exc)
+    logger.debug('Response: %s', response)
 
     if response is None:
         response = Response(
@@ -27,13 +32,19 @@ def custom_exception_handler(exc, context):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if isinstance(exc, ValidationError):
+        data = exc.detail if isinstance(exc.detail, dict) else {
+            'detail': exc.detail
+        }
+        response = Response(data, status=exc.status_code)
+    if isinstance(exc, IntegrityError):
         response = Response(
-            {'detail': exc.detail},
-            status=exc.status_code
+            {'detail': 'Это поле должно быть уникальным.'},
+            status=status.HTTP_400_BAD_REQUEST
         )
-    elif isinstance(exc, IntegrityError):
+    if isinstance(exc, ParseError):
         response = Response(
-            {'detail': 'Вы уже подписаны на этого пользователя.'},
+            {'detail': 'Ошибка чтения данных в формате JSON. '
+                       'Проверьте корректность.'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
