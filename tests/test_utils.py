@@ -4,6 +4,8 @@ from http import HTTPStatus
 
 from PIL import Image
 
+from core.constants import INGREDIENTS_URL, TAGS_URL
+
 
 def list_available(url, fixture_name):
     """Список доступен определенным пользователям."""
@@ -14,12 +16,17 @@ def list_available(url, fixture_name):
         f'GET {url} должен возвращать 200, '
         f'но вернул {response.status_code}'
     )
-    assert 'results' in response.json(), (
-        f'Ответ {url} должен содержать ключ "results"'
-    )
-    assert isinstance(response.json().get('results'), list), (
-        f'Значение ключа "results" из {url} должно быть списком'
-    )
+    if url in (TAGS_URL, INGREDIENTS_URL):
+        assert isinstance(response.json(), list), (
+            f'Ответ {url} должен быть списком.'
+        )
+    else:
+        assert 'results' in response.json(), (
+            f'Ответ {url} должен содержать ключ "results"'
+        )
+        assert isinstance(response.json().get('results'), list), (
+            f'Значение ключа "results" из {url} должно быть списком'
+        )
 
 def generate_base64_image(color='blue', size=(100, 100), fmt='PNG'):
     """Генерирует base64-строку изображения заданного цвета и размера."""

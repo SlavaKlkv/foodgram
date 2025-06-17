@@ -11,14 +11,14 @@ from users.views import UserViewSet
 app_name = 'api'
 
 router_v1 = DefaultRouter()
-router_v1.register('users', UserViewSet, basename='users')
-router_v1.register('tags', TagViewSet, basename='tags')
-router_v1.register(
-    'ingredients',
-    IngredientViewSet,
-    basename='ingredients'
-)
-router_v1.register('recipes', RecipeViewSet, basename='recipes')
+routes = [
+    ('users', UserViewSet),
+    ('tags', TagViewSet),
+    ('ingredients', IngredientViewSet),
+    ('recipes', RecipeViewSet),
+]
+for prefix, viewset in routes:
+    router_v1.register(prefix, viewset, basename=prefix)
 
 urlpatterns = [
     path('', include(router_v1.urls)),

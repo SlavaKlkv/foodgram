@@ -6,6 +6,10 @@ from django.db.models import (
     When
 )
 
+from logging_setup import logger_setup
+
+logger = logger_setup()
+
 from recipes.models import Ingredient, Recipe
 
 
@@ -38,10 +42,16 @@ class RecipeFilter(django_filters.FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ('author', 'tags')
+        fields = (
+            'author',
+            'tags',
+            'is_favorited',
+            'is_in_shopping_cart',
+        )
 
     def _filter_by_user_relation(self, queryset, related_field, value):
         user = self.request.user
+
         if user.is_anonymous:
             return queryset.none() if value else queryset
         filter_expr = {f'{related_field}__user': user}

@@ -360,11 +360,11 @@ class TestRecipes:
 
         before_response_json = getattr(auth_client, 'get')(url).json()
 
-        data = {
+        data_to_change = {
             'ingredients': [
                 {'id': ing['id'], 'amount': ing['amount']}
                 for ing in
-                recipe_with_ingredients_and_tags_2.recipes_ingredients.values(
+                recipe_with_ingredients_and_tags_2.recipe_ingredients.values(
                     'id', 'amount'
                 )
             ],
@@ -376,7 +376,11 @@ class TestRecipes:
             'cooking_time': recipe_with_ingredients_and_tags_2.cooking_time,
         }
         if method == 'patch':
-            response = auth_client_2.patch(url, data=data, format='json')
+            response = auth_client_2.patch(
+                url,
+                data=data_to_change,
+                format='json'
+            )
         else:
             response = auth_client_2.delete(url)
         assert response.status_code == HTTPStatus.FORBIDDEN, (

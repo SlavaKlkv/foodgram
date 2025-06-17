@@ -4,7 +4,10 @@ from rest_framework import serializers
 from core.constants import DIGITS
 from core.exceptions import ValidationError
 from core.fields import CustomBase64ImageField
+from logging_setup import logger_setup
 from users.models import Subscription
+
+logger = logger_setup()
 
 User = get_user_model()
 
@@ -89,8 +92,9 @@ class SubscriptionSerializer(UserProfileSerializer):
             'recipes_limit'
         )
         recipes = obj.recipes.all()
-        if recipes_limit is not None and recipes_limit in DIGITS:
+        if recipes_limit is not None and recipes_limit in str(DIGITS):
             recipes = recipes[:int(recipes_limit)]
+
         return RecipeShortSerializer(
             recipes,
             many=True,

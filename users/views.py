@@ -15,7 +15,7 @@ from users.serializers import (
 
 
 class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
-    object = 'пользователя'
+    object = 'Пользователь'
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
@@ -27,17 +27,17 @@ class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
     def get_queryset(self):
         return User.objects.all()
 
-    def _handle_subscription(self, request, action):
+    def _handle_subscription(self, request, operation):
         user = request.user
         try:
             author = self.get_object()
         except Http404:
             return Response(
-                {'detail': 'Такого пользователя не существует.'},
+                {'detail': 'Пользователь не найден.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if action == 'create':
+        if operation == 'create':
             serializer = SubscriptionSerializer(
                 data={'author': author.id,},
                 context={'request': request}
@@ -46,8 +46,15 @@ class UserViewSet(CustomGetObjectMixin, DjoserUserViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if action == 'delete':
-            Subscription.objects.filter(user=user, author=author).delete()
+        if operation == 'delete':
+            subscription = Subscription.objects.filter(user=user,
+                                                       author=author)
+            if not subscription.exists():
+                return Response(
+                    {'detail': 'Подписка не найдена.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=('post',))

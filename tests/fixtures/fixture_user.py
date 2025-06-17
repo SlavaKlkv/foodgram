@@ -28,15 +28,6 @@ def user_2(django_user_model):
 
 
 @pytest.fixture
-def another_user(django_user_model):
-    return django_user_model.objects.create_user(
-        username='testuseranother',
-        email='testuseranother@email.com',
-        password='1234567'
-    )
-
-
-@pytest.fixture
 def token_user(user, client):
     response = client.post(USER_LOGIN_URL, {
         'email': 'testuser@email.com',

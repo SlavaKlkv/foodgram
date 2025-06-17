@@ -1,5 +1,7 @@
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from core.constants import (
     INGREDIENT_TITLE_MAX_LENGTH,
@@ -24,7 +26,6 @@ class Tag(models.Model):
         unique=True,
         verbose_name='Слаг',
         blank=True,
-        null=True,
         validators=[
             RegexValidator(
                 regex=r'^[-a-zA-Z0-9_]+$',
@@ -107,7 +108,7 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipes_ingredients',
+        related_name='recipe_ingredients',
         verbose_name='Рецепт с ингредиентом',
     )
     ingredient = models.ForeignKey(
@@ -188,3 +189,9 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f'{self.user} добавил в избранное: {self.recipe}'
+
+
+@receiver(post_delete, sender=Recipe)
+def delete_recipe_image(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
