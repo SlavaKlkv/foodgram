@@ -1,0 +1,31 @@
+# Папки, которые не нужны в образе Django-приложения
+media/
+logs/
+frontend/
+infra/
+docs/
+tests/
+data/
+postman_collection/
+venv/
+.vscode/
+.idea/
+.git/
+__pycache__/
+node_modules/
+
+# Лишние файлы
+*.pyc
+*.pyo
+*.sqlite3*
+*.log
+*.md
+*.sh
+*.env
+*.DS_Store
+.env.*
+.pylintrc
+.gitignore
+.gitkeep
+pytest.ini
+setup.cfg

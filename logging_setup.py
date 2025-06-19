@@ -16,7 +16,10 @@ def logger_setup():
         '%(filename)s - %(funcName)s - %(lineno)d')
     os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
     handler = RotatingFileHandler(
-        f'{BASE_DIR}/logs/logger.log', maxBytes=50000000, backupCount=5)
+        f'{BASE_DIR}/logs/logger.log',
+        maxBytes=2_560_000,
+        backupCount=5
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 

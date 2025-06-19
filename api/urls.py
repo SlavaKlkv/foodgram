@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from pages.views import AboutViewSet, TechnologiesViewSet
 from recipes.views import (
     IngredientViewSet,
     RecipeViewSet,
@@ -16,6 +17,8 @@ routes = [
     ('tags', TagViewSet),
     ('ingredients', IngredientViewSet),
     ('recipes', RecipeViewSet),
+    ('about', AboutViewSet),
+    ('technologies', TechnologiesViewSet),
 ]
 for prefix, viewset in routes:
     router_v1.register(prefix, viewset, basename=prefix)
