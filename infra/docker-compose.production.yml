@@ -8,25 +8,25 @@ volumes:
 services:
   db:
     image: postgres:13
-    env_file: .env
+    env_file: ../.env
     volumes:
       - pg_data_production:/var/lib/postgresql/data
   backend:
     image: slavakulikov/foodgram_backend
-    env_file: .env
+    env_file: ../.env
     volumes:
       - static_volume:/backend_static
       - media_files:/media
       - ../data:/app/data
   frontend:
     image: slavakulikov/foodgram_frontend
-    env_file: .env
+    env_file: ../.env
     command: cp -r /app/build/. /static/
     volumes:
       - static_volume:/static
   nginx:
     image: slavakulikov/foodgram_gateway
-    env_file: .env
+    env_file: ../.env
     ports:
       - 9090:80
     volumes:
