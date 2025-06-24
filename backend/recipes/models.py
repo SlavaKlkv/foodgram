@@ -1,3 +1,8 @@
+from django.core.validators import RegexValidator
+from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 from core.constants import (
     INGREDIENT_TITLE_MAX_LENGTH,
     MEASUREMENT_UNIT_MAX_LENGTH,
@@ -5,10 +10,6 @@ from core.constants import (
     TAG_FIELD_MAX_LENGTH
 )
 from core.fields import FromOneSmallIntegerField
-from django.core.validators import RegexValidator
-from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from users.models import User
 
 
@@ -144,7 +145,7 @@ class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='in_shopping_carts',
+        related_name='is_in_shopping_cart',
         verbose_name='Рецепт в списке покупок'
     )
 
@@ -172,7 +173,7 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorited_by',
+        related_name='is_favorited',
         verbose_name='Рецепт в избранном'
     )
 

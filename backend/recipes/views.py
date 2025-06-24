@@ -1,10 +1,15 @@
+from django.conf import settings
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.response import Response
+
 from core.filters import IngredientFilter, RecipeFilter
 from core.mixins import CustomGetObjectMixin
 from core.pagination import CustomLimitOffsetPagination
 from core.permissions import IsAuthorOrReadOnly
-from django.conf import settings
-from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -19,10 +24,6 @@ from recipes.serializers import (
     RecipeWriteSerializer,
     TagSerializer
 )
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
-from rest_framework.response import Response
 
 
 class TagViewSet(CustomGetObjectMixin, viewsets.ReadOnlyModelViewSet):
@@ -58,6 +59,24 @@ class RecipeViewSet(CustomGetObjectMixin, viewsets.ModelViewSet):
             'genitive': 'из избранного'
         }
     }
+
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        user = self.request.user
+        filter_params = (
+            ('is_in_shopping_cart', 'is_in_shopping_cart__user'),
+            ('is_favorited', 'is_favorited__user'),
+        )
+
+        for param, filter_expr in filter_params:
+            value = self.request.query_params.get(param)
+            if value in ('1', 'true', 'True'):
+                if user.is_authenticated:
+                    queryset = queryset.filter(**{filter_expr: user})
+                else:
+                    return queryset.none()
+
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -144,7 +163,7 @@ class RecipeViewSet(CustomGetObjectMixin, viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        recipes = Recipe.objects.filter(in_shopping_carts__user=request.user)
+        recipes = Recipe.objects.filter(is_in_shopping_cart__user=request.user)
 
         # Подсчет и суммирование ингредиентов
         ingredients = {}

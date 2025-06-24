@@ -11,6 +11,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
+USE_SQLITE = os.getenv("USE_SQLITE", "0") == "1"
+
 SITE_URL = 'http://fdgrm.duckdns.org'
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost',
@@ -72,8 +74,6 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-USE_SQLITE = os.getenv("USE_SQLITE", "0") == "1"
-
 if USE_SQLITE:
     DATABASES = {
         "default": {
@@ -120,11 +120,10 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "collected_static"
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
+MEDIA_ROOT = BASE_DIR / "media" if USE_SQLITE else "/media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
