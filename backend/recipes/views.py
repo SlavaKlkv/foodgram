@@ -1,23 +1,18 @@
-from django.conf import settings
-from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
-from rest_framework.response import Response
-
 from core.filters import IngredientFilter, RecipeFilter
 from core.mixins import CustomGetObjectMixin
 from core.pagination import CustomLimitOffsetPagination
 from core.permissions import IsAuthorOrReadOnly
+from django.conf import settings
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
-from recipes.serializers import (
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeShortSerializer,
-    RecipeWriteSerializer,
-    TagSerializer,
-)
+from recipes.serializers import (IngredientSerializer, RecipeReadSerializer,
+                                 RecipeShortSerializer, RecipeWriteSerializer,
+                                 TagSerializer)
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.response import Response
 
 
 class TagViewSet(CustomGetObjectMixin, viewsets.ReadOnlyModelViewSet):

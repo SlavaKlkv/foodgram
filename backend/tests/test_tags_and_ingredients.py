@@ -1,14 +1,9 @@
 from http import HTTPStatus
 
 import pytest
+from core.constants import (INGREDIENT_DETAIL_URL, INGREDIENTS_URL,
+                            TAG_DETAIL_URL, TAGS_URL, UNAUTH_AND_AUTH_CLIENTS)
 
-from core.constants import (
-    INGREDIENT_DETAIL_URL,
-    INGREDIENTS_URL,
-    TAG_DETAIL_URL,
-    TAGS_URL,
-    UNAUTH_AND_AUTH_CLIENTS,
-)
 from .test_utils import list_available
 
 

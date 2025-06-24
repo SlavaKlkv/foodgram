@@ -1,10 +1,9 @@
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
-
 from core.constants import DIGITS
 from core.exceptions import ValidationError
 from core.fields import CustomBase64ImageField
+from django.contrib.auth import get_user_model
 from logging_setup import logger_setup
+from rest_framework import serializers
 from users.models import Subscription
 
 logger = logger_setup()

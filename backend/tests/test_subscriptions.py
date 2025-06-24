@@ -1,9 +1,9 @@
 from http import HTTPStatus
 
 import pytest
-
 from core.constants import USER_SUBSCRIBE_URL, USER_SUBSCRIPTIONS_URL
 from users.models import Subscription
+
 from .test_utils import list_available
 
 

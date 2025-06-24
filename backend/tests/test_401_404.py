@@ -1,21 +1,11 @@
 from http import HTTPStatus
 
 import pytest
-
-from core.constants import (
-    NON_EXISTENT_ID,
-    RECIPE_DETAIL_URL,
-    RECIPES_URL,
-    TAG_DETAIL_URL,
-    UNAUTH_AND_AUTH_CLIENTS,
-    USER_AVATAR_URL,
-    USER_DETAIL_URL,
-    USER_LOGOUT_URL,
-    USER_ME_URL,
-    USER_PASSWORD_URL,
-    USER_SUBSCRIBE_URL,
-    USER_SUBSCRIPTIONS_URL,
-)
+from core.constants import (NON_EXISTENT_ID, RECIPE_DETAIL_URL, RECIPES_URL,
+                            TAG_DETAIL_URL, UNAUTH_AND_AUTH_CLIENTS,
+                            USER_AVATAR_URL, USER_DETAIL_URL, USER_LOGOUT_URL,
+                            USER_ME_URL, USER_PASSWORD_URL, USER_SUBSCRIBE_URL,
+                            USER_SUBSCRIPTIONS_URL)
 
 
 @pytest.mark.django_db

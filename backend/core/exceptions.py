@@ -1,10 +1,9 @@
 from django.db import IntegrityError
+from logging_setup import logger_setup
 from rest_framework import status
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
-
-from logging_setup import logger_setup
 
 logger = logger_setup()
 

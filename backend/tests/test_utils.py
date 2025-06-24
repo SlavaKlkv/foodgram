@@ -2,9 +2,8 @@ import base64
 import io
 from http import HTTPStatus
 
-from PIL import Image
-
 from core.constants import INGREDIENTS_URL, TAGS_URL
+from PIL import Image
 
 
 def list_available(url, fixture_name):

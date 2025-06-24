@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from users.models import Subscription, User
 
 admin.site.empty_value_display = "Не указано"

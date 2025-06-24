@@ -2,11 +2,11 @@ from http import HTTPStatus
 from typing import Any, Dict, List
 
 import pytest
-
-from core.constants import RECIPE_DETAIL_URL, RECIPES_URL, \
-    UNAUTH_AND_AUTH_CLIENTS
+from core.constants import (RECIPE_DETAIL_URL, RECIPES_URL,
+                            UNAUTH_AND_AUTH_CLIENTS)
 from logging_setup import logger_setup
 from recipes.models import Recipe
+
 from .test_utils import generate_base64_image, list_available
 
 logger = logger_setup()

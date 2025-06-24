@@ -1,6 +1,5 @@
 import django_filters
 from django.db.models import Case, IntegerField, Q, When
-
 from logging_setup import logger_setup
 from recipes.models import Ingredient, Recipe
 
