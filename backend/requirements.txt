@@ -37,3 +37,4 @@ pytest-django==4.11.1
 flake8==7.2.0
 django-filter==25.1
 psycopg2-binary==2.9.10
+autopep8==2.3.2

@@ -10,20 +10,13 @@ class Custom404Middleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if (
-            response.status_code == 404
-            and request.path.startswith('/api/')
-        ):
+        if response.status_code == 404 and request.path.startswith("/api/"):
             try:
                 data = json.loads(response.content)
                 if isinstance(data, dict) and "detail" in data:
                     return response
             except Exception as exc:
                 logging.debug(
-                    f"Custom404Middleware: Ошибка разбора json: {exc!r}"
-                )
-            return JsonResponse(
-                {'detail': 'Страница не найдена.'},
-                status=404
-            )
+                    f"Custom404Middleware: Ошибка разбора json: {exc!r}")
+            return JsonResponse({"detail": "Страница не найдена."}, status=404)
         return response

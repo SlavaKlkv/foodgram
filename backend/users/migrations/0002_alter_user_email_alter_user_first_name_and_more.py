@@ -32,7 +32,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="user",
             name="username",
-            field=models.CharField(max_length=150, verbose_name="Имя пользователя"),
+            field=models.CharField(
+                max_length=150, verbose_name="Имя пользователя"),
         ),
         migrations.CreateModel(
             name="Subscription",

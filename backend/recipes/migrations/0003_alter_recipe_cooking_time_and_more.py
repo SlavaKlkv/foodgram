@@ -9,8 +9,7 @@ import core.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("recipes", "0002_alter_favorite_recipe_alter_recipe_cooking_time_and_more"),
-    ]
+        ("recipes", "0002_alter_favorite_recipe_alter_recipe_cooking_time_and_more"), ]
 
     operations = [
         migrations.AlterField(

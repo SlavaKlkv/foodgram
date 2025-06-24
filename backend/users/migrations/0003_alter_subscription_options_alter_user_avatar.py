@@ -21,7 +21,9 @@ class Migration(migrations.Migration):
             model_name="user",
             name="avatar",
             field=models.ImageField(
-                blank=True, null=True, upload_to="users/", verbose_name="Аватар"
-            ),
+                blank=True,
+                null=True,
+                upload_to="users/",
+                verbose_name="Аватар"),
         ),
     ]

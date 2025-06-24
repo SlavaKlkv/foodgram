@@ -37,7 +37,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "measurement_unit",
-                    models.CharField(max_length=64, verbose_name="Единица измерения"),
+                    models.CharField(
+                        max_length=64, verbose_name="Единица измерения"),
                 ),
             ],
             options={
@@ -59,7 +60,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(max_length=256, verbose_name="Название рецепта"),
+                    models.CharField(
+                        max_length=256, verbose_name="Название рецепта"),
                 ),
                 (
                     "image",
@@ -124,7 +126,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "slug",
-                    models.SlugField(max_length=32, unique=True, verbose_name="Слаг"),
+                    models.SlugField(max_length=32, unique=True,
+                                     verbose_name="Слаг"),
                 ),
             ],
             options={

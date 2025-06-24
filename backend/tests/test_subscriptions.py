@@ -1,9 +1,9 @@
 from http import HTTPStatus
 
 import pytest
-from users.models import Subscription
 
 from core.constants import USER_SUBSCRIBE_URL, USER_SUBSCRIPTIONS_URL
+from users.models import Subscription
 from .test_utils import list_available
 
 
@@ -14,10 +14,8 @@ class TestSubscriptions:
         """Получение списка подписок возвращает 200."""
         list_available(USER_SUBSCRIPTIONS_URL, auth_client)
 
-
     def test_subscribe_successfully_creates_subscription(
-            self, auth_client, user_2
-    ):
+            self, auth_client, user_2):
         """Успешная подписка создаёт объект подписки."""
 
         url = USER_SUBSCRIBE_URL.format(id=user_2.id)
@@ -25,28 +23,29 @@ class TestSubscriptions:
         response = auth_client.post(url)
 
         assert response.status_code == HTTPStatus.CREATED, (
-            f'POST {url} должен возвращать 201, '
-            f'но вернул {response.status_code}'
+            f"POST {url} должен возвращать 201, "
+            f"но вернул {response.status_code}"
         )
-        assert Subscription.objects.count() == subscriptions_before + 1, (
-            'Количество подписок должно увеличиться на 1.'
-        )
+        assert (
+            Subscription.objects.count() == subscriptions_before + 1
+        ), "Количество подписок должно увеличиться на 1."
 
     @pytest.mark.parametrize(
-        'target_id, error_text',
+        "target_id, error_text",
         [
-            pytest.param('self', 'Нельзя подписаться на самого себя.'),
-            pytest.param('duplicate', 'Вы уже подписаны на этого пользователя.')
-        ]
+            pytest.param("self", "Нельзя подписаться на самого себя."),
+            pytest.param(
+                "duplicate", "Вы уже подписаны на этого пользователя."),
+        ],
     )
     def test_user_cannot_subscribe_invalid_cases(
         self, auth_client, user, user_2, target_id, error_text
     ):
         """Попытки подписаться на себя и повторно возвращают 400."""
         url = USER_SUBSCRIBE_URL.format(
-            id=user.id if target_id == 'self' else user_2.id
+            id=user.id if target_id == "self" else user_2.id
         )
-        if target_id == 'duplicate':
+        if target_id == "duplicate":
             Subscription.objects.create(user=user, author=user_2)
 
         subscriptions_before = Subscription.objects.count()
@@ -54,21 +53,20 @@ class TestSubscriptions:
         subscriptions_after = Subscription.objects.count()
 
         assert response.status_code == HTTPStatus.BAD_REQUEST, (
-            f'POST {url} должен возвращать 400, '
-            f'но вернул {response.status_code}'
+            f"POST {url} должен возвращать 400, "
+            f"но вернул {response.status_code}"
         )
-        assert subscriptions_after == subscriptions_before, (
-            'Количество подписок не должно измениться при ошибке.'
-        )
-        assert error_text in response.json().get('detail', ''), (
+        assert (
+            subscriptions_after == subscriptions_before
+        ), "Количество подписок не должно измениться при ошибке."
+        assert error_text in response.json().get("detail", ""), (
             f"Ожидалось сообщение об ошибке: '{error_text}', "
             f"но было: {response.json()}"
         )
 
-    def test_unsubscribe_successfully_deletes_subscription(self,
-                                                           auth_client,
-                                                           user, user_2
-                                                           ):
+    def test_unsubscribe_successfully_deletes_subscription(
+        self, auth_client, user, user_2
+    ):
         """Успешная отписка удаляет объект подписки."""
         Subscription.objects.create(user=user, author=user_2)
         url = USER_SUBSCRIBE_URL.format(id=user_2.id)
@@ -77,9 +75,9 @@ class TestSubscriptions:
         subscriptions_after = Subscription.objects.count()
 
         assert response.status_code == HTTPStatus.NO_CONTENT, (
-            f'DELETE {url} должен возвращать 204, '
-            f'но вернул {response.status_code}'
+            f"DELETE {url} должен возвращать 204, "
+            f"но вернул {response.status_code}"
         )
-        assert subscriptions_after == subscriptions_before - 1, (
-            'Количество подписок должно уменьшиться на 1.'
-        )
+        assert (
+            subscriptions_after == subscriptions_before - 1
+        ), "Количество подписок должно уменьшиться на 1."

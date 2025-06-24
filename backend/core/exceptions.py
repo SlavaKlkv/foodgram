@@ -11,8 +11,8 @@ logger = logger_setup()
 
 class ValidationError(Exception):
     status_code = status.HTTP_400_BAD_REQUEST
-    default_detail = 'Ошибка валидации.'
-    default_code = 'validation_error'
+    default_detail = "Ошибка валидации."
+    default_code = "validation_error"
 
     def __init__(self, detail=None, code=None):
         self.detail = detail or self.default_detail
@@ -23,29 +23,31 @@ class ValidationError(Exception):
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
-    logger.error('Exception: %s %s', type(exc), exc)
-    logger.debug('Response: %s', response)
+    logger.error("Exception: %s %s", type(exc), exc)
+    logger.debug("Response: %s", response)
 
     if response is None:
         response = Response(
-            {'detail': 'Произошла неизвестная ошибка.'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            {"detail": "Произошла неизвестная ошибка."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     if isinstance(exc, ValidationError):
         data = exc.detail if isinstance(exc.detail, dict) else {
-            'detail': exc.detail
-        }
+            "detail": exc.detail}
         response = Response(data, status=exc.status_code)
     if isinstance(exc, IntegrityError):
         response = Response(
-            {'detail': 'Это поле должно быть уникальным.'},
-            status=status.HTTP_400_BAD_REQUEST
+            {"detail": "Это поле должно быть уникальным."},
+            status=status.HTTP_400_BAD_REQUEST,
         )
     if isinstance(exc, ParseError):
         response = Response(
-            {'detail': 'Ошибка чтения данных в формате JSON. '
-                       'Проверьте корректность.'},
-            status=status.HTTP_400_BAD_REQUEST
+            {
+                "detail": "Ошибка чтения данных в формате JSON. "
+                "Проверьте корректность."
+            },
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     return response

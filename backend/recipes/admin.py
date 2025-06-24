@@ -9,7 +9,7 @@ from .models import (
     Tag
 )
 
-admin.site.empty_value_display = 'Не указано'
+admin.site.empty_value_display = "Не указано"
 
 
 class RecipeIngredientInline(admin.StackedInline):
@@ -19,23 +19,20 @@ class RecipeIngredientInline(admin.StackedInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = (
-        'name',
-        'author',
-        'favorites_count'
-    )
-    search_fields = ('name', 'author')
-    list_filter = ('tags',)
+    list_display = ("name", "author", "favorites_count")
+    search_fields = ("name", "author")
+    list_filter = ("tags",)
     inlines = (RecipeIngredientInline,)
 
-    @admin.display(description='В избранном')
+    @admin.display(description="В избранном")
     def favorites_count(self, obj):
         return obj.favorited_by.count()
 
+
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'measurement_unit')
-    search_fields = ('name',)
+    list_display = ("name", "measurement_unit")
+    search_fields = ("name",)
 
 
 admin.site.register(RecipeIngredient)

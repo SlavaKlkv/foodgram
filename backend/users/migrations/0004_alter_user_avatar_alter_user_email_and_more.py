@@ -31,7 +31,8 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 max_length=150,
                 unique=True,
-                validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],
+                validators=[
+                    django.contrib.auth.validators.UnicodeUsernameValidator()],
                 verbose_name="Имя пользователя",
             ),
         ),

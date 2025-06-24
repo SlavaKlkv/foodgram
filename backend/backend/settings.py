@@ -7,16 +7,16 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = True
 
 USE_SQLITE = os.getenv("USE_SQLITE", "0") == "1"
 
-SITE_URL = 'http://fdgrm.duckdns.org'
+SITE_URL = "http://fdgrm.duckdns.org"
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost',
-                 '89.169.168.164', 'fdgrm.duckdns.org']
+ALLOWED_HOSTS = ["127.0.0.1", "localhost",
+                 "89.169.168.164", "fdgrm.duckdns.org"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -25,19 +25,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    'rest_framework',
-    'rest_framework.authtoken',
-    'django_filters',
-    'djoser',
-    'core',
-    'users',
-    'recipes',
-    'api',
-    'pages',
+    "rest_framework",
+    "rest_framework.authtoken",
+    "django_filters",
+    "djoser",
+    "core",
+    "users",
+    "recipes",
+    "api",
+    "pages",
 ]
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -47,7 +46,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'core.middleware.Custom404Middleware',
+    "core.middleware.Custom404Middleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -110,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = "ru-RU"
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -122,40 +121,39 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "collected_static"
 
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media" if USE_SQLITE else "/media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
-            'rest_framework.throttling.UserRateThrottle',
-            'rest_framework.throttling.AnonRateThrottle',
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.AnonRateThrottle",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'user': '1000/hour',
-        'anon': '100/hour',
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "1000/hour",
+        "anon": "100/hour",
     },
-    'DEFAULT_PAGINATION_CLASS': 'core.pagination.CustomLimitOffsetPagination',
-    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
+    "EXCEPTION_HANDLER": "core.exceptions.custom_exception_handler",
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend"
     ],
-
 }
 
 DJOSER = {
-    'SERIALIZERS': {
-        **{
-            key: 'users.serializers.UserProfileSerializer'
-            for key in ('user', 'current_user')
-        },
-        'user_create': 'users.serializers.UserCreateSerializer',
+    "SERIALIZERS": {
+        **dict.fromkeys(
+            ("user", "current_user"),
+            "users.serializers.UserProfileSerializer",
+        ),
+        "user_create": "users.serializers.UserCreateSerializer",
     }
 }

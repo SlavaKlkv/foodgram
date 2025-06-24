@@ -3,11 +3,11 @@ from rest_framework.exceptions import NotFound
 
 
 class CustomGetObjectMixin:
-    object = 'Объект'
+    object = "Объект"
 
     @property
     def not_found_detail(self):
-        return f'{self.object} не найден.'
+        return f"{self.object} не найден."
 
     def get_object(self):
         try:
