@@ -1,9 +1,9 @@
-from core.constants import DIGITS
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
 from core.exceptions import ValidationError
 from core.fields import CustomBase64ImageField
-from django.contrib.auth import get_user_model
 from logging_setup import logger_setup
-from rest_framework import serializers
 from users.models import Subscription
 
 logger = logger_setup()
@@ -90,7 +90,7 @@ class SubscriptionSerializer(UserProfileSerializer):
         recipes_limit = self.context.get(
             "request").query_params.get("recipes_limit")
         recipes = obj.recipes.all()
-        if recipes_limit is not None and recipes_limit in str(DIGITS):
+        if recipes_limit is not None:
             recipes = recipes[: int(recipes_limit)]
 
         return RecipeShortSerializer(

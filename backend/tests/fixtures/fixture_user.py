@@ -1,6 +1,7 @@
 import pytest
-from core.constants import USER_LOGIN_URL
 from rest_framework.test import APIClient
+
+from core.constants import USER_LOGIN_URL
 
 
 @pytest.fixture

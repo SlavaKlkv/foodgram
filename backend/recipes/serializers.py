@@ -1,10 +1,17 @@
+from rest_framework import serializers
+
 from core.exceptions import ValidationError
 from core.fields import CustomBase64ImageField
-from rest_framework import serializers
 from users.serializers import UserProfileSerializer
 
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                     ShoppingCart, Tag)
+from .models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 
 
 class TagSerializer(serializers.ModelSerializer):

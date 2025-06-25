@@ -1,8 +1,9 @@
-from core.constants import EMAIL_MAX_LENGTH, NAME_MAX_LENGTH
-from core.managers import UserManager
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+
+from core.constants import EMAIL_MAX_LENGTH, NAME_MAX_LENGTH
+from core.managers import UserManager
 
 
 class User(AbstractUser):

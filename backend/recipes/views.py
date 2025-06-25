@@ -1,18 +1,23 @@
-from core.filters import IngredientFilter, RecipeFilter
-from core.mixins import CustomGetObjectMixin
-from core.pagination import CustomLimitOffsetPagination
-from core.permissions import IsAuthorOrReadOnly
 from django.conf import settings
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
-from recipes.serializers import (IngredientSerializer, RecipeReadSerializer,
-                                 RecipeShortSerializer, RecipeWriteSerializer,
-                                 TagSerializer)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
+
+from core.filters import IngredientFilter, RecipeFilter
+from core.mixins import CustomGetObjectMixin
+from core.pagination import CustomLimitOffsetPagination
+from core.permissions import IsAuthorOrReadOnly
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
+from recipes.serializers import (
+    IngredientSerializer,
+    RecipeReadSerializer,
+    RecipeShortSerializer,
+    RecipeWriteSerializer,
+    TagSerializer,
+)
 
 
 class TagViewSet(CustomGetObjectMixin, viewsets.ReadOnlyModelViewSet):
@@ -135,29 +140,11 @@ class RecipeViewSet(CustomGetObjectMixin, viewsets.ModelViewSet):
     @action(detail=False, methods=("get",),
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
-        recipes = Recipe.objects.filter(is_in_shopping_cart__user=request.user)
+        from recipes.utils import generate_shopping_list
 
-        # Подсчет и суммирование ингредиентов
-        ingredients = {}
-        for recipe in recipes:
-            for recipe_ingredient in recipe.recipe_ingredients.all():
-                key = (
-                    recipe_ingredient.ingredient.name,
-                    recipe_ingredient.ingredient.measurement_unit,
-                )
-                if key in ingredients:
-                    ingredients[key] += recipe_ingredient.amount
-                else:
-                    ingredients[key] = recipe_ingredient.amount
-
-        # Формирование текста для скачивания
-        lines = ["Список покупок:"]
-        for (name, unit), amount in ingredients.items():
-            lines.append(f"- {name} ({unit}) — {amount}")
-        txt_content = "\n".join(lines)
-
+        txt_content = generate_shopping_list(request.user)
         response = HttpResponse(txt_content, content_type="text/plain")
-        response["Content-Disposition"] = ('attachment; '
-                                           'filename="shopping_cart.txt"')
-
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_cart.txt"'
+        )
         return response

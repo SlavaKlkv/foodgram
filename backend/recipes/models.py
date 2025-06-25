@@ -1,11 +1,15 @@
-from core.constants import (INGREDIENT_TITLE_MAX_LENGTH,
-                            MEASUREMENT_UNIT_MAX_LENGTH,
-                            RECIPE_TITLE_MAX_LENGTH, TAG_FIELD_MAX_LENGTH)
-from core.fields import FromOneSmallIntegerField
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+
+from core.constants import (
+    INGREDIENT_TITLE_MAX_LENGTH,
+    MEASUREMENT_UNIT_MAX_LENGTH,
+    RECIPE_TITLE_MAX_LENGTH,
+    TAG_FIELD_MAX_LENGTH,
+)
+from core.fields import FromOneSmallIntegerField
 from users.models import User
 
 
@@ -13,9 +17,7 @@ class Tag(models.Model):
     name = models.CharField(
         max_length=TAG_FIELD_MAX_LENGTH,
         unique=True,
-        verbose_name="Название тега",
-        blank=True,
-        default="tag",
+        verbose_name="Название тега"
     )
     slug = models.SlugField(
         max_length=TAG_FIELD_MAX_LENGTH,
@@ -52,6 +54,12 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = "Ингредиент"
         verbose_name_plural = "Ингредиенты"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("name", "measurement_unit"),
+                name="unique_ingredient"
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -63,7 +71,7 @@ class Recipe(models.Model):
         verbose_name="Название рецепта",
     )
     image = models.ImageField(
-        "Изображение",
+        verbose_name="Изображение",
         upload_to="recipes/images/",
     )
     text = models.TextField(
@@ -77,7 +85,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        "recipes",
+        related_name="recipes",
         through="RecipeIngredient",
         verbose_name="Ингредиенты",
     )
@@ -86,15 +94,19 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        "recipes",
+        related_name="recipes",
         verbose_name="Теги",
         help_text="Выберите один или несколько тегов.",
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата публикации",
     )
 
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
-        ordering = ("-id",)
+        ordering = ("-pub_date",)
 
     def __str__(self):
         return self.name

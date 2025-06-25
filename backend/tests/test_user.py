@@ -2,14 +2,23 @@ import base64
 from http import HTTPStatus
 from typing import Any, Dict, List, Tuple
 
-import pytest
-from core.constants import (UNAUTH_AND_AUTH_CLIENTS, USER_AVATAR_URL,
-                            USER_DETAIL_URL, USER_LOGIN_URL, USER_LOGOUT_URL,
-                            USER_ME_URL, USER_PASSWORD_URL, USERS_URL)
 from PIL import Image
+import pytest
+
+from core.constants import (
+    UNAUTH_AND_AUTH_CLIENTS,
+    USER_AVATAR_URL,
+    USER_DETAIL_URL,
+    USER_LOGIN_URL,
+    USER_LOGOUT_URL,
+    USER_ME_URL,
+    USER_PASSWORD_URL,
+    USERS_URL,
+)
 from users.models import User
 
 from .test_utils import list_available
+
 
 INVALID_VALUES: Dict[str, List[Any]] = {
     "email": ["not an email"],

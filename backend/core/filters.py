@@ -1,7 +1,9 @@
-import django_filters
 from django.db.models import Case, IntegerField, Q, When
+import django_filters
 from logging_setup import logger_setup
+
 from recipes.models import Ingredient, Recipe
+
 
 logger = logger_setup()
 
