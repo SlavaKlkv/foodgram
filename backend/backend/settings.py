@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,8 +15,6 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 USE_SQLITE = os.getenv("USE_SQLITE", "0") == "1"
 
 SITE_URL = "http://fdgrm.duckdns.org"
-
-import os
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv(
