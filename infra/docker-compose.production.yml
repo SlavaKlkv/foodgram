@@ -17,7 +17,6 @@ services:
     volumes:
       - static_volume:/backend_static
       - media_files:/media
-      - ../data:/app/data
   frontend:
     image: slavakulikov/foodgram_frontend
     env_file: ../.env
