@@ -9,7 +9,6 @@ from .models import (
     Tag,
 )
 
-
 admin.site.empty_value_display = "Не указано"
 
 
@@ -27,7 +26,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description="В избранном")
     def favorites_count(self, obj):
-        return obj.favorited_by.count()
+        return obj.is_favorited.count()
 
 
 @admin.register(Ingredient)
