@@ -9,6 +9,7 @@ from .models import (
     Tag,
 )
 
+
 admin.site.empty_value_display = "Не указано"
 
 
