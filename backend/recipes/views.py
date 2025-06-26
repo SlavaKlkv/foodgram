@@ -8,7 +8,6 @@ from rest_framework.response import Response
 
 from core.filters import IngredientFilter, RecipeFilter
 from core.mixins import CustomGetObjectMixin
-from core.pagination import CustomLimitOffsetPagination
 from core.permissions import IsAuthorOrReadOnly
 from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from recipes.serializers import (
@@ -40,7 +39,7 @@ class RecipeViewSet(CustomGetObjectMixin, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    pagination_class = CustomLimitOffsetPagination
+    # pagination_class = CustomLimitOffsetPagination
     object = "Рецепт"
 
     ACTION_CASES = {

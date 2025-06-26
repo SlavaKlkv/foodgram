@@ -147,7 +147,7 @@ REST_FRAMEWORK = {
         "user": "1000/hour",
         "anon": "100/hour",
     },
-    "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.LimitOffsetPagination",
     "EXCEPTION_HANDLER": "core.exceptions.custom_exception_handler",
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend"
