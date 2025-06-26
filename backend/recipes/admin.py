@@ -9,7 +9,6 @@ from .models import (
     Tag,
 )
 
-
 admin.site.empty_value_display = "Не указано"
 
 
@@ -21,7 +20,7 @@ class RecipeIngredientInline(admin.StackedInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ("name", "author", "favorites_count")
-    search_fields = ("name", "author")
+    search_fields = ("name", "author__username")
     list_filter = ("tags",)
     inlines = (RecipeIngredientInline,)
 
