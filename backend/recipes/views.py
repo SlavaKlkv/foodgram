@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.response import Response
 
 from core.filters import IngredientFilter, RecipeFilter
@@ -39,7 +39,6 @@ class RecipeViewSet(CustomGetObjectMixin, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    # pagination_class = CustomLimitOffsetPagination
     object = "Рецепт"
 
     ACTION_CASES = {
